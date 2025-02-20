@@ -46,7 +46,7 @@ const UpgradeDescription = "Kubernetes deprecated API upgrade - DO NOT rollback 
 
 // ReplaceManifestUnSupportedAPIs returns a release manifest with deprecated or removed
 // Kubernetes APIs updated to supported APIs
-func ReplaceManifestUnSupportedAPIs(origManifest, mapFile string, kubeConfig KubeConfig) (string, error) {
+func ReplaceManifestUnSupportedAPIs(origManifest, mapFile string, kubeConfig KubeConfig, extra ...*mapping.Mapping) (string, error) {
 	var modifiedManifest = origManifest
 	var err error
 	var mapMetadata *mapping.Metadata
@@ -54,6 +54,11 @@ func ReplaceManifestUnSupportedAPIs(origManifest, mapFile string, kubeConfig Kub
 	// Load the mapping data
 	if mapMetadata, err = mapping.LoadMapfile(mapFile); err != nil {
 		return "", errors.Wrapf(err, "Failed to load mapping file: %s", mapFile)
+	}
+
+	// Append extra mappings to the config
+	for _, m := range extra {
+		mapMetadata.Mappings = append(mapMetadata.Mappings, m)
 	}
 
 	// get the Kubernetes server version
